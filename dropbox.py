@@ -4,7 +4,7 @@
 #
 # dropbox
 # Dropbox frontend script
-# This file is part of nautilus-dropbox 2026.03.20.
+# This file is part of nautilus-dropbox 2026.05.06.
 #
 # nautilus-dropbox is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -211,7 +211,7 @@ def verify_signature(key_file, sig_file, plain_file):
 
 def download_file_chunk(url, buf):
     opener = urllib.request.build_opener()
-    opener.addheaders = [("User-Agent", "DropboxLinuxDownloader/2026.03.20")]
+    opener.addheaders = [("User-Agent", "DropboxLinuxDownloader/2026.05.06")]
 
     with closing(opener.open(url)) as f:
         size = int(f.info()["content-length"])
@@ -1660,7 +1660,7 @@ def version(argv):
         pass
 
     console_print("Dropbox daemon version: %s" % dropbox_daemon_version)
-    console_print("Dropbox command-line interface version: 2026.03.20")
+    console_print("Dropbox command-line interface version: 2026.05.06")
 
 
 @command

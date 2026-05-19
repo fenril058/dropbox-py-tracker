@@ -28,3 +28,4 @@ Goals:
 Tags correspond to upstream-reported versions:
 
 - v2026.03.20
+- v2026.05.06
