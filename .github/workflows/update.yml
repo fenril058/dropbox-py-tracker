@@ -1,0 +1,90 @@
+name: Update Dropbox Script
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh
+
+      - name: Run updater
+        run: ./scripts/update.sh
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract version
+        if: steps.changes.outputs.changed == 'true'
+        id: version
+        run: |
+          VERSION=$(./scripts/extract-version.sh dropbox.py)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Generate diff summary
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          ./scripts/diff-summary.sh > diff-summary.txt || true
+
+      - name: Commit changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git checkout -b update-dropbox-${{ steps.version.outputs.version }}
+          git add dropbox.py metadata.json headers.txt
+          git commit -m "Update dropbox.py to ${{ steps.version.outputs.version }}"
+          git tag v${{ steps.version.outputs.version }} || true
+
+      - name: Create pull request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: update-dropbox-${{ steps.version.outputs.version }}
+          title: "Update dropbox.py to ${{ steps.version.outputs.version }}"
+          commit-message: "Update dropbox.py to ${{ steps.version.outputs.version }}"
+          body: |
+            Automated upstream update detected.
+
+            ## Version
+
+            `${{ steps.version.outputs.version }}`
+
+            ## Metadata
+
+            See updated `metadata.json`.
+
+            ## Diff Summary
+
+            ```diff
+            ${{ steps.version.outputs.version }}
+            ```
+
+            Review the generated diff before merge.
+          labels: |
+            upstream-update
+            automated-pr
