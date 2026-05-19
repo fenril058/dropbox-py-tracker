@@ -49,24 +49,28 @@ jobs:
 
       - name: Generate diff summary
         if: steps.changes.outputs.changed == 'true'
+        id: diff
         run: |
           ./scripts/diff-summary.sh > diff-summary.txt || true
-
-      - name: Commit changes
-        if: steps.changes.outputs.changed == 'true'
-        run: |
-          git checkout -b update-dropbox-${{ steps.version.outputs.version }}
-          git add dropbox.py metadata.json headers.txt
-          git commit -m "Update dropbox.py to ${{ steps.version.outputs.version }}"
-          git tag v${{ steps.version.outputs.version }} || true
+          CONTENT=$(head -150 diff-summary.txt)
+          {
+            echo "content<<EOF"
+            echo "$CONTENT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
         if: steps.changes.outputs.changed == 'true'
+        id: pr
         uses: peter-evans/create-pull-request@v7
         with:
           branch: update-dropbox-${{ steps.version.outputs.version }}
           title: "Update dropbox.py to ${{ steps.version.outputs.version }}"
-          commit-message: "Update dropbox.py to ${{ steps.version.outputs.version }}"
+          commit-message: "Update upstream dropbox.py to ${{ steps.version.outputs.version }}"
+          add-paths: |
+            dropbox.py
+            metadata.json
+            headers.txt
           body: |
             Automated upstream update detected.
 
@@ -81,10 +85,16 @@ jobs:
             ## Diff Summary
 
             ```diff
-            ${{ steps.version.outputs.version }}
+            ${{ steps.diff.outputs.content }}
             ```
 
             Review the generated diff before merge.
           labels: |
             upstream-update
             automated-pr
+
+      - name: Push tag
+        if: steps.changes.outputs.changed == 'true' && steps.pr.outputs.pull-request-number != ''
+        run: |
+          git tag v${{ steps.version.outputs.version }} || true
+          git push origin v${{ steps.version.outputs.version }} || true
