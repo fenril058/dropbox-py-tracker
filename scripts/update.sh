@@ -48,16 +48,15 @@ echo "==> Updating tracked files"
 cp "$TMP_FILE" dropbox.py
 cp "$TMP_HEADERS" headers.txt
 
-cat > metadata.json <<EOF
-{
-  "upstream_url": "$UPSTREAM_URL",
-  "upstream_version": "$NEW_VERSION",
-  "sha256": "$NEW_SHA256",
-  "fetched_at_utc": "$FETCHED_AT",
-  "cloudfront_pop": "$CLOUDFRONT_POP",
-  "final_url": "$FINAL_URL"
-}
-EOF
+jq -n \
+  --arg upstream_url "$UPSTREAM_URL" \
+  --arg upstream_version "$NEW_VERSION" \
+  --arg sha256 "$NEW_SHA256" \
+  --arg fetched_at_utc "$FETCHED_AT" \
+  --arg cloudfront_pop "$CLOUDFRONT_POP" \
+  --arg final_url "$FINAL_URL" \
+  '{upstream_url: $upstream_url, upstream_version: $upstream_version, sha256: $sha256, fetched_at_utc: $fetched_at_utc, cloudfront_pop: $cloudfront_pop, final_url: $final_url}' \
+  > metadata.json
 
 echo "==> Updated metadata.json"
 cat metadata.json

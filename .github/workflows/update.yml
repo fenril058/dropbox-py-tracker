@@ -53,10 +53,11 @@ jobs:
         run: |
           ./scripts/diff-summary.sh > diff-summary.txt || true
           CONTENT=$(head -150 diff-summary.txt)
+          DELIM="DIFF_CONTENT_$(openssl rand -hex 8)"
           {
-            echo "content<<EOF"
+            echo "content<<$DELIM"
             echo "$CONTENT"
-            echo "EOF"
+            echo "$DELIM"
           } >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
@@ -95,6 +96,8 @@ jobs:
 
       - name: Push tag
         if: steps.changes.outputs.changed == 'true' && steps.pr.outputs.pull-request-number != ''
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          git tag v${{ steps.version.outputs.version }} || true
-          git push origin v${{ steps.version.outputs.version }} || true
+          git tag "v$VERSION" || true
+          git push origin "v$VERSION" || true
