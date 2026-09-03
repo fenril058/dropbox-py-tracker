@@ -1,8 +1,8 @@
 {
   "upstream_url": "https://www.dropbox.com/download?dl=packages/dropbox.py",
-  "upstream_version": "2026.05.06.",
-  "sha256": "4c2319d6bad065b92ec6f5da2d90bae750214573bc127e6442b036dd72a973ca",
-  "fetched_at_utc": "2026-05-19T11:23:34Z",
-  "cloudfront_pop": "SEA900-P2",
+  "upstream_version": "2026.05.06",
+  "sha256": "c53a91d36566785bef88beb8b1fb3b1847a037d41e6ce2e26f1ceddf5a5c0342",
+  "fetched_at_utc": "2026-09-03T16:39:54Z",
+  "cloudfront_pop": "IAD61-P13",
   "final_url": "https://linux.dropbox.com/packages/dropbox.py"
 }

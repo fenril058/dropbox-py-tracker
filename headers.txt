@@ -5,41 +5,40 @@ cross-origin-opener-policy-report-only: same-origin; report-to=coop-coop
 location: https://linux.dropbox.com/packages/dropbox.py
 referrer-policy: strict-origin-when-cross-origin
 reporting-endpoints: csp-metaserver-whitelist="https://www.dropbox.com/csp_log?policy_name=metaserver-whitelist", max_age=10886400, csp-metaserver-dynamic="https://www.dropbox.com/csp_log?policy_name=metaserver-dynamic", max_age=10886400, coop-coop="https://www.dropbox.com/csp_log?policy_name=coop", max_age=10886400, coop-dws2="https://www.dropbox.com/csp_log?policy_name=coop-dws2", max_age=10886400, coop-metaserver="https://www.dropbox.com/csp_log?policy_name=coop-metaserver", max_age=10886400
-set-cookie: gvc=MTg3MTMxNjM4NTAwMTAwNDc1NDA3MDc0NDc1Nzc5NzY2NjIxMTk4; expires=Sun, 18 May 2031 11:23:33 GMT; HttpOnly; Path=/; SameSite=None; Secure
-set-cookie: t=Oxg8aUryzLiIiHUXN5uGsZd8; Domain=dropbox.com; expires=Wed, 19 May 2027 11:23:33 GMT; HttpOnly; Path=/; SameSite=None; Secure
-set-cookie: __Host-js_csrf=Oxg8aUryzLiIiHUXN5uGsZd8; expires=Wed, 19 May 2027 11:23:33 GMT; Path=/; SameSite=None; Secure
-set-cookie: __Host-ss=Wohb_YBRmM; expires=Wed, 19 May 2027 11:23:33 GMT; HttpOnly; Path=/; SameSite=Strict; Secure
-set-cookie: locale=en; Domain=dropbox.com; expires=Sun, 18 May 2031 11:23:33 GMT; Path=/; SameSite=None; Secure
+set-cookie: gvc=MjY0MDUzMzY5OTQ0MTI3OTExNzU4NjM4MDQ3MjczNzM3MzIzMDkz; expires=Tue, 02 Sep 2031 16:39:54 GMT; HttpOnly; Path=/; SameSite=None; Secure
+set-cookie: t=4KDGpr5MGjK5mn8fQklAUbo_; Domain=dropbox.com; expires=Fri, 03 Sep 2027 16:39:54 GMT; HttpOnly; Path=/; SameSite=None; Secure
+set-cookie: __Host-js_csrf=4KDGpr5MGjK5mn8fQklAUbo_; expires=Fri, 03 Sep 2027 16:39:54 GMT; Path=/; SameSite=None; Secure
+set-cookie: __Host-ss=vsObsHb-NU; expires=Fri, 03 Sep 2027 16:39:54 GMT; HttpOnly; Path=/; SameSite=Strict; Secure
+set-cookie: locale=en; Domain=dropbox.com; expires=Tue, 02 Sep 2031 16:39:54 GMT; Path=/; SameSite=None; Secure
 x-content-type-options: nosniff
 x-frame-options: SAMEORIGIN
 x-permitted-cross-domain-policies: none
 x-xss-protection: 1; mode=block
-date: Tue, 19 May 2026 11:23:33 GMT
+date: Thu, 03 Sep 2026 16:39:53 GMT
 server: envoy
 strict-transport-security: max-age=31536000; includeSubDomains
 strict-transport-security: max-age=31536000; includeSubDomains
 content-length: 147
-x-dropbox-trace-id: 76bae637c3944a7db8de7c596a0c4835
+x-dropbox-trace-id: 7a57ad01d94b46c7a3543a8e6a99a2da
 cache-control: no-cache, no-store
 alt-svc: h3=":443"; ma=86400, h3-29=":443"; ma=86400
 vary: Accept-Encoding
 x-dropbox-response-origin: far_remote
-x-dropbox-request-id: 76bae637c3944a7db8de7c596a0c4835
+x-dropbox-request-id: 7a57ad01d94b46c7a3543a8e6a99a2da
 
 HTTP/1.1 200 OK
 Content-Type: text/x-python; charset=utf-8
-Content-Length: 61390
+Content-Length: 63523
 Connection: keep-alive
-Accept-Ranges: bytes
 Last-Modified: Sun, 09 Sep 2001 01:46:40 GMT
-x-envoy-upstream-service-time: 1
-Server: envoy
-x-dropbox-request-id: d183f085c9be4131a86842fa6a0c42a8
-Date: Tue, 19 May 2026 11:23:34 GMT
+Date: Thu, 03 Sep 2026 16:39:54 GMT
 Cache-Control: no-cache, no-store
-Vary: Accept-Encoding
-X-Cache: RefreshHit from cloudfront
-Via: 1.1 f9901b257e7117ad9d6c331954cb762c.cloudfront.net (CloudFront)
-X-Amz-Cf-Pop: SEA900-P2
-X-Amz-Cf-Id: 5f3_yJzvUy_rTbB7y3LQCc1APTCMQpMI4_t_nrqTUcutUr47t4CGHQ==
+x-envoy-upstream-service-time: 0
+Server: envoy
+Accept-Ranges: bytes
+x-dropbox-request-id: b07dcc1f927749f0a6edaafe6a99a2da
+X-Cache: Miss from cloudfront
+Via: 1.1 fb9b6eb5c6b5a0132525f0c834eb3180.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: IAD61-P13
+X-Amz-Cf-Id: 3_8t5p5BLGv89SojkGrbNR5yBDuxS9mAhUUW_Tb_wMIORGu-4RKnzQ==
 
