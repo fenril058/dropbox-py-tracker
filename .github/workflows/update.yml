@@ -6,13 +6,21 @@ on:
   schedule:
     - cron: '0 9 * * 1'
 
+# Deny all GITHUB_TOKEN permissions unless a job explicitly needs them.
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   update:
+    name: Update Dropbox Script
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # Push the automated update branch.
+      pull-requests: write # Create or update the automated pull request.
 
     steps:
       - name: Checkout repository
@@ -20,6 +28,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
@@ -34,7 +43,7 @@ jobs:
       - name: Detect changes
         id: changes
         run: |
-          if git diff --quiet; then
+          if [[ -z "$(git status --porcelain -- dropbox.py metadata.json headers.txt)" ]]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -51,53 +60,101 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         id: diff
         run: |
-          ./scripts/diff-summary.sh > diff-summary.txt || true
+          ./scripts/diff-summary.sh > diff-summary.txt
+
           CONTENT=$(head -150 diff-summary.txt)
           DELIM="DIFF_CONTENT_$(openssl rand -hex 8)"
+
           {
             echo "content<<$DELIM"
             echo "$CONTENT"
             echo "$DELIM"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Create pull request
+      - name: Commit, push, and create pull request
         if: steps.changes.outputs.changed == 'true'
-        id: pr
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        with:
-          branch: update-dropbox-${{ steps.version.outputs.version }}
-          title: "Update dropbox.py to ${{ steps.version.outputs.version }}"
-          commit-message: "Update upstream dropbox.py to ${{ steps.version.outputs.version }}"
-          add-paths: |
-            dropbox.py
-            metadata.json
-            headers.txt
-          body: |
-            Automated upstream update detected.
-
-            ## Version
-
-            `${{ steps.version.outputs.version }}`
-
-            ## Metadata
-
-            See updated `metadata.json`.
-
-            ## Diff Summary
-
-            ```diff
-            ${{ steps.diff.outputs.content }}
-            ```
-
-            Review the generated diff before merge.
-          labels: |
-            upstream-update
-            automated-pr
-
-      - name: Push tag
-        if: steps.changes.outputs.changed == 'true' && steps.pr.outputs.pull-request-number != ''
         env:
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
+          DIFF_CONTENT: ${{ steps.diff.outputs.content }}
+          BASE_BRANCH: ${{ github.ref_name }}
         run: |
-          git tag "v$VERSION" || true
-          git push origin "v$VERSION" || true
+          BRANCH="update-dropbox-$VERSION"
+          TITLE="Update dropbox.py to $VERSION"
+
+          # checkout uses persist-credentials: false, so configure temporary
+          # Git authentication through GitHub CLI for this step.
+          gh auth setup-git --force --hostname github.com
+
+          # Remember the existing remote branch state so an update cannot
+          # accidentally overwrite somebody else's concurrent change.
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch origin \
+              "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+            REMOTE_SHA=$(git rev-parse "refs/remotes/origin/$BRANCH")
+          else
+            REMOTE_SHA=""
+          fi
+
+          git switch -C "$BRANCH"
+
+          git add -- \
+            dropbox.py \
+            metadata.json \
+            headers.txt
+
+          git commit -m "$TITLE"
+
+          if [[ -n "$REMOTE_SHA" ]]; then
+            git push \
+              --force-with-lease="refs/heads/$BRANCH:$REMOTE_SHA" \
+              origin \
+              "HEAD:refs/heads/$BRANCH"
+          else
+            git push origin "HEAD:refs/heads/$BRANCH"
+          fi
+
+          {
+            echo "Automated upstream update detected."
+            echo
+            echo "## Version"
+            echo
+            printf "\`%s\`\n" "$VERSION"
+            echo
+            echo "## Metadata"
+            echo
+            printf "See updated \`metadata.json\`.\n"
+            echo
+            echo "## Diff Summary"
+            echo
+            printf "\`\`\`diff\n"
+            printf '%s\n' "$DIFF_CONTENT"
+            printf "\`\`\`\n"
+            echo
+            echo "Review the generated diff before merge."
+          } > pr-body.md
+
+          PR_NUMBER=$(
+            gh pr list \
+              --state open \
+              --base "$BASE_BRANCH" \
+              --head "$BRANCH" \
+              --json number \
+              --jq '.[0].number // empty'
+          )
+
+          if [[ -n "$PR_NUMBER" ]]; then
+            gh pr edit "$PR_NUMBER" \
+              --title "$TITLE" \
+              --body-file pr-body.md \
+              --add-label upstream-update \
+              --add-label automated-pr
+          else
+            gh pr create \
+              --base "$BASE_BRANCH" \
+              --head "$BRANCH" \
+              --title "$TITLE" \
+              --body-file pr-body.md \
+              --label upstream-update \
+              --label automated-pr
+          fi
